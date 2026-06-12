@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PepsiCo Ecuador — Reto Logístico</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070B14;
+  --bg2: #0D1526;
+  --bg3: #111E35;
+  --blue: #004B93;
+  --blue2: #0078D7;
+  --red: #ED1C24;
+  --gold: #F7B731;
+  --green: #2ED573;
+  --cyan: #48DBFB;
+  --white: #F0F4FF;
+  --gray: #4A5568;
+  --gray2: #2D3748;
+  --font-title: 'Barlow Condensed', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-data: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── INTRO SCREEN ── */
+#intro-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.stars-bg {
+  position: absolute; inset: 0; pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  background: var(--white);
+  border-radius: 50%;
+  animation: twinkle var(--d, 3s) infinite var(--delay, 0s);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,120,215,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,120,215,0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.pepsi-globe {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--blue) 0deg 180deg,
+    var(--red) 180deg 360deg
+  );
+  position: relative;
+  animation: globeSpin 8s linear infinite, float 3s ease-in-out infinite;
+  box-shadow: 0 0 60px rgba(0,120,215,0.5), 0 0 120px rgba(237,28,36,0.2);
+  margin-bottom: 40px;
+}
+
+.pepsi-globe::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: 40%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 22%;
+  background: var(--white);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(255,255,255,0.3);
+}
+
+.pepsi-globe::after {
+  content: '';
+  position: absolute; inset: 8px;
+  border-radius: 50%;
+  background: rgba(7,11,20,0.15);
+  background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25) 0%, transparent 60%);
+}
+
+@keyframes globeSpin {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+.intro-title {
+  font-family: var(--font-title);
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1;
+  text-align: center;
+  background: linear-gradient(135deg, var(--blue2), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.intro-sub {
+  font-family: var(--font-title);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.intro-desc {
+  font-size: 15px;
+  color: rgba(240,244,255,0.6);
+  text-align: center;
+  max-width: 520px;
+  line-height: 1.7;
+  margin-bottom: 48px;
+}
+
+.btn-start {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 18px 64px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border: none;
+  border-radius: 4px;
+  color: var(--white);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 30px rgba(0,120,215,0.4);
+}
+
+.btn-start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(0,120,215,0.6);
+}
+
+.btn-start::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15));
+}
+
+/* ── GAME LAYOUT ── */
+#game-screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,11,20,0.97);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,120,215,0.3);
+  padding: 0 24px;
+  height: 64px;
+  display: flex; align-items: center; gap: 24px;
+}
+
+.header-logo {
+  font-family: var(--font-title);
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.header-logo span { color: var(--blue2); }
+.header-logo small {
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(240,244,255,0.5);
+  display: block;
+  letter-spacing: 2px;
+  margin-top: -4px;
+}
+
+.header-sep { flex: 1; }
+
+.timer-block {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px;
+  background: rgba(237,28,36,0.12);
+  border: 1px solid rgba(237,28,36,0.4);
+  border-radius: 4px;
+}
+
+.timer-label {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--red);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.timer-value {
+  font-family: var(--font-data);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--red);
+  animation: blink 1s step-end infinite;
+  min-width: 70px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.timer-value.urgent { color: var(--red); animation: blinkFast 0.4s step-end infinite; }
+
+@keyframes blinkFast {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.1; }
+}
+
+.score-block {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 20px;
+  background: rgba(247,183,49,0.1);
+  border: 1px solid rgba(247,183,49,0.35);
+  border-radius: 4px;
+}
+
+.score-label {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: var(--gold);
+  letter-spacing: 2px;
+}
+
+.score-value {
+  font-family: var(--font-data);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--gold);
+  min-width: 56px;
+  transition: transform 0.15s;
+}
+
+.score-value.bump { animation: scoreBump 0.3s ease; }
+@keyframes scoreBump { 0%,100%{transform:scale(1)} 50%{transform:scale(1.25)} }
+
+.btn-submit {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 28px;
+  background: linear-gradient(135deg, var(--green), #1ba354);
+  border: none; border-radius: 4px;
+  color: #070B14;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-submit:not(:disabled):hover { transform: scale(1.04); }
+
+/* MAIN 3-COLUMN LAYOUT */
+.main-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 290px;
+  gap: 0;
+  flex: 1;
+  min-height: calc(100vh - 64px);
+}
+
+/* LEFT PANEL */
+.left-panel {
+  background: var(--bg2);
+  border-right: 1px solid rgba(0,120,215,0.2);
+  overflow-y: auto;
+  padding: 16px 12px;
+}
+
+.panel-title {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(240,244,255,0.4);
+  text-transform: uppercase;
+  padding: 0 4px 12px;
+  border-bottom: 1px solid rgba(0,120,215,0.2);
+  margin-bottom: 12px;
+}
+
+/* CITY CARDS */
+.city-card {
+  background: var(--bg3);
+  border: 1px solid rgba(0,120,215,0.15);
+  border-radius: 6px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.city-card.in-route { border-color: var(--gold); }
+.city-card.assigned { border-color: var(--green); }
+.city-card.conflict { border-color: var(--red); }
+
+.city-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.city-header:hover { background: rgba(0,120,215,0.08); }
+
+.city-code {
+  font-family: var(--font-data);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue2);
+  background: rgba(0,120,215,0.15);
+  padding: 2px 6px;
+  border-radius: 3px;
+  min-width: 38px;
+  text-align: center;
+}
+
+.city-name {
+  font-family: var(--font-title);
+  font-size: 17px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.city-status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--gray);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.city-card.in-route .city-status-dot { background: var(--gold); }
+.city-card.assigned .city-status-dot { background: var(--green); }
+.city-card.conflict .city-status-dot { background: var(--red); }
+
+.city-toggle {
+  font-size: 12px; color: rgba(240,244,255,0.4);
+  transition: transform 0.2s;
+}
+
+.city-card.open .city-toggle { transform: rotate(180deg); }
+
+.city-details {
+  display: none;
+  padding: 0 12px 12px;
+  border-top: 1px solid rgba(0,120,215,0.12);
+}
+
+.city-card.open .city-details { display: block; }
+
+.city-meta {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin: 10px 0;
+}
+
+.meta-item {
+  background: rgba(0,0,0,0.3);
+  border-radius: 4px;
+  padding: 6px 8px;
+}
+
+.meta-label {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: rgba(240,244,255,0.4);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.meta-value {
+  font-family: var(--font-data);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.priority-tag {
+  display: inline-block;
+  font-family: var(--font-data);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+.priority-urgent { background: rgba(237,28,36,0.2); color: var(--red); border: 1px solid rgba(237,28,36,0.4); }
+.priority-volume { background: rgba(247,183,49,0.2); color: var(--gold); border: 1px solid rgba(247,183,49,0.4); }
+.priority-cold { background: rgba(72,219,251,0.2); color: var(--cyan); border: 1px solid rgba(72,219,251,0.4); }
+.priority-normal { background: rgba(74,85,104,0.3); color: rgba(240,244,255,0.6); border: 1px solid rgba(74,85,104,0.4); }
+.priority-base { background: rgba(0,120,215,0.2); color: var(--blue2); border: 1px solid rgba(0,120,215,0.4); }
+
+/* VEHICLE SELECTOR 2x2 */
+.vehicle-label {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: rgba(240,244,255,0.4);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.vehicle-btn {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,120,215,0.2);
+  border-radius: 5px;
+  padding: 8px 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.vehicle-btn:hover { border-color: var(--blue2); background: rgba(0,120,215,0.1); }
+
+.vehicle-btn.selected {
+  border-color: var(--green);
+  background: rgba(46,213,115,0.12);
+  box-shadow: 0 0 10px rgba(46,213,115,0.2);
+}
+
+.vehicle-btn.conflict {
+  border-color: var(--red);
+  background: rgba(237,28,36,0.1);
+}
+
+.vehicle-icon { font-size: 22px; margin-bottom: 3px; }
+
+.vehicle-name {
+  font-family: var(--font-data);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.5px;
+}
+
+.vehicle-cap {
+  font-family: var(--font-data);
+  font-size: 8px;
+  color: rgba(240,244,255,0.45);
+}
+
+/* ROUTE SUMMARY at bottom of left */
+.route-summary {
+  margin-top: 12px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,120,215,0.2);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.route-path {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--gold);
+  word-break: break-all;
+  line-height: 1.8;
+  min-height: 20px;
+}
+
+/* CENTER: MAP */
+.center-panel {
+  position: relative;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.map-title {
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(240,244,255,0.35);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  align-self: flex-start;
+}
+
+#ecuador-map {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+}
+
+/* SVG map elements */
+.city-marker {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.city-marker:hover circle { r: 14; }
+
+.city-ring {
+  fill: none;
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.city-marker.in-route .city-ring { opacity: 1; }
+
+.route-line {
+  stroke: var(--gold);
+  stroke-width: 2.5;
+  fill: none;
+  stroke-dasharray: 8 4;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.route-line.active {
+  opacity: 1;
+  animation: dashMove 1.5s linear infinite;
+}
+
+@keyframes dashMove {
+  to { stroke-dashoffset: -60; }
+}
+
+.route-arrow {
+  fill: var(--gold);
+  opacity: 0;
+}
+
+.route-arrow.active { opacity: 1; }
+
+.map-hint {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: rgba(240,244,255,0.35);
+  text-align: center;
+  margin-top: 12px;
+  letter-spacing: 1px;
+}
+
+/* Map clear button */
+.btn-clear-route {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  background: transparent;
+  border: 1px solid rgba(237,28,36,0.4);
+  color: var(--red);
+  border-radius: 3px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s;
+}
+
+.btn-clear-route:hover { background: rgba(237,28,36,0.1); }
+
+/* RIGHT PANEL */
+.right-panel {
+  background: var(--bg2);
+  border-left: 1px solid rgba(0,120,215,0.2);
+  overflow-y: auto;
+  padding: 16px 12px;
+}
+
+/* METRICS */
+.metric-block {
+  background: var(--bg3);
+  border: 1px solid rgba(0,120,215,0.15);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.metric-header {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.metric-name {
+  font-family: var(--font-data);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(240,244,255,0.5);
+}
+
+.metric-pts {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.metric-bar-track {
+  height: 6px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--blue), var(--blue2));
+  transition: width 0.5s ease;
+}
+
+.metric-bar-fill.good { background: linear-gradient(90deg, var(--green), #1ba354); }
+.metric-bar-fill.warn { background: linear-gradient(90deg, var(--gold), #d4981e); }
+.metric-bar-fill.bad { background: linear-gradient(90deg, var(--red), #b01017); }
+
+.metric-detail {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: rgba(240,244,255,0.4);
+}
+
+/* FLEET STATUS */
+.fleet-section {
+  margin-bottom: 10px;
+}
+
+.fleet-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg3);
+  border-radius: 5px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(0,120,215,0.12);
+}
+
+.fleet-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gray);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.fleet-dot.active { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.fleet-dot.in-route { background: var(--gold); }
+.fleet-dot.conflict { background: var(--red); }
+
+.fleet-city {
+  font-family: var(--font-data);
+  font-size: 11px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.fleet-vehicle {
+  font-family: var(--font-data);
+  font-size: 10px;
+  color: rgba(240,244,255,0.5);
+}
+
+/* SCORE PREVIEW */
+.score-preview {
+  background: rgba(247,183,49,0.07);
+  border: 1px solid rgba(247,183,49,0.2);
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.score-big {
+  font-family: var(--font-title);
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.score-max {
+  font-family: var(--font-data);
+  font-size: 11px;
+  color: rgba(240,244,255,0.4);
+  letter-spacing: 2px;
+}
+
+/* ── RESULT MODAL ── */
+#result-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(7,11,20,0.92);
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.modal-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--bg2);
+  border: 1px solid rgba(0,120,215,0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0,120,215,0.2);
+}
+
+.modal-header {
+  background: linear-gradient(135deg, var(--blue), #002d5c);
+  padding: 28px 32px;
+  display: flex; align-items: center; gap: 24px;
+}
+
+.score-circle-wrap {
+  flex-shrink: 0;
+}
+
+.score-circle {
+  width: 110px; height: 110px;
+  position: relative;
+}
+
+.score-circle svg { transform: rotate(-90deg); }
+
+.score-circle-number {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
+.score-circle-val {
+  font-family: var(--font-title);
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.score-circle-label {
+  font-family: var(--font-data);
+  font-size: 9px;
+  color: rgba(240,244,255,0.5);
+  letter-spacing: 2px;
+}
+
+.modal-title-block {}
+
+.modal-title {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.modal-subtitle {
+  font-size: 14px;
+  color: rgba(240,244,255,0.6);
+}
+
+.modal-body { padding: 24px 32px; }
+
+.modal-section-title {
+  font-family: var(--font-title);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(240,244,255,0.4);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,120,215,0.2);
+}
+
+/* Route comparison */
+.route-comparison {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 24px;
+}
+
+.route-col { }
+
+.route-col-title {
+  font-family: var(--font-data);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--cyan);
+}
+
+.route-col-title.optimal { color: var(--green); }
+
+.route-display {
+  font-family: var(--font-data);
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--gold);
+}
+
+.route-display.optimal { color: var(--green); }
+
+/* Score breakdown */
+.score-breakdown { margin-bottom: 24px; }
+
+.breakdown-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,120,215,0.1);
+}
+
+.breakdown-icon { font-size: 16px; width: 24px; text-align: center; }
+
+.breakdown-name {
+  font-size: 13px;
+  flex: 1;
+  color: rgba(240,244,255,0.8);
+}
+
+.breakdown-pts {
+  font-family: var(--font-data);
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+.breakdown-pts.pos { color: var(--green); }
+.breakdown-pts.neg { color: var(--red); }
+.breakdown-pts.zero { color: rgba(240,244,255,0.3); }
+
+.breakdown-bar {
+  width: 80px;
+  height: 4px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.breakdown-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--green);
+}
+
+/* Evaluator analysis */
+.evaluator-card {
+  background: var(--bg3);
+  border: 1px solid rgba(72,219,251,0.2);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.evaluator-title {
+  font-family: var(--font-data);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.evaluator-text {
+  font-size: 14px;
+  color: rgba(240,244,255,0.7);
+  line-height: 1.7;
+}
+
+.modal-footer {
+  padding: 20px 32px;
+  border-top: 1px solid rgba(0,120,215,0.2);
+  display: flex; justify-content: center; gap: 12px;
+}
+
+.btn-retry {
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 36px;
+  background: linear-gradient(135deg, var(--blue), var(--blue2));
+  border: none; border-radius: 4px;
+  color: var(--white);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.btn-retry:hover { transform: scale(1.04); }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,120,215,0.3); border-radius: 10px; }
+
+/* Notification toast */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--bg3);
+  border: 1px solid var(--blue2);
+  border-radius: 6px;
+  padding: 12px 18px;
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--white);
+  z-index: 200;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s;
+  max-width: 300px;
+}
+
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.warn { border-color: var(--red); }
+.toast.success { border-color: var(--green); }
+
+/* Time expired overlay */
+#time-expired {
+  display: none;
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(7,11,20,0.85);
+  align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.expired-msg {
+  font-family: var(--font-title);
+  font-size: 80px;
+  font-weight: 900;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  animation: expiredPulse 0.5s ease infinite alternate;
+}
+
+@keyframes expiredPulse {
+  from { opacity: 1; }
+  to { opacity: 0.3; }
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .center-panel, .right-panel { border: none; border-top: 1px solid rgba(0,120,215,0.2); }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ INTRO SCREEN ══════════ -->
+<div id="intro-screen">
+  <div class="grid-bg"></div>
+  <div class="stars-bg" id="stars-bg"></div>
+  <div class="pepsi-globe"></div>
+  <div class="intro-title">RETO LOGÍSTICO</div>
+  <div class="intro-sub">PepsiCo Ecuador · Pasantías 2026</div>
+  <p class="intro-desc">
+    Diseña la ruta de distribución más eficiente desde Guayaquil.<br>
+    Asigna el vehículo correcto a cada destino. Optimiza tiempo, capacidad y cadena de frío.<br>
+    <strong>Los 5 mejores puntajes serán finalistas.</strong>
+  </p>
+  <button class="btn-start" onclick="startGame()">▶ INICIAR MISIÓN</button>
+</div>
+
+<!-- ══════════ GAME SCREEN ══════════ -->
+<div id="game-screen">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-logo">
+      <span>PEPSI</span>CO
+      <small>LOGISTICS OPS CENTER</small>
+    </div>
+    <div class="header-sep"></div>
+    <div class="timer-block">
+      <span class="timer-label">⏱ TIEMPO</span>
+      <span class="timer-value" id="timer-display">05:00</span>
+    </div>
+    <div class="score-block">
+      <span class="score-label">◆ SCORE</span>
+      <span class="score-value" id="score-live">0</span>
+    </div>
+    <button class="btn-submit" id="btn-submit" disabled onclick="submitRoute()">
+      ✓ ENVIAR RUTA
+    </button>
+  </header>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+      <div class="panel-title">▣ Destinos de Entrega</div>
+
+      <!-- GYE BASE (not clickable as destination) -->
+      <div class="city-card assigned" id="card-GYE">
+        <div class="city-header" onclick="toggleCard('GYE')">
+          <span class="city-code">GYE</span>
+          <span class="city-name">Guayaquil</span>
+          <span class="city-status-dot"></span>
+          <span class="city-toggle">▼</span>
+        </div>
+        <div class="city-details">
+          <span class="priority-tag priority-base">BASE / ORIGEN</span>
+          <div class="city-meta">
+            <div class="meta-item"><div class="meta-label">Rol</div><div class="meta-value" style="color:var(--blue2)">Origen</div></div>
+            <div class="meta-item"><div class="meta-label">Regreso</div><div class="meta-value" style="color:var(--cyan)">Obligatorio</div></div>
+          </div>
+          <div style="font-size:11px;color:rgba(240,244,255,0.4);font-family:var(--font-data)">Punto de partida y retorno de todos los vehículos.</div>
+        </div>
+      </div>
+
+      <!-- UIO -->
+      <div class="city-card" id="card-UIO">
+        <div class="city-header" onclick="toggleCard('UIO')">
+          <span class="city-code">UIO</span>
+          <span class="city-name">Quito</span>
+          <span class="city-status-dot"></span>
+          <span class="city-toggle">▼</span>
+        </div>
+        <div class="city-details">
+          <span class="priority-tag priority-urgent">⚡ URGENTE — HOY</span>
+          <div class="city-meta">
+            <div class="meta-item"><div class="meta-label">Unidades</div><div class="meta-value" style="color:var(--gold)">420</div></div>
+            <div class="meta-item"><div class="meta-label">Ventana</div><div class="meta-value" style="color:var(--red)">≤ 4.5h</div></div>
+            <div class="meta-item"><div class="meta-label">Penaliz.</div><div class="meta-value" style="color:var(--red)">-120 pts</div></div>
+            <div class="meta-item"><div class="meta-label">Dist.GYE</div><div class="meta-value">275 km</div></div>
+          </div>
+          <div style="font-size:10px;color:rgba(240,244,255,0.5);font-family:var(--font-data);margin-bottom:10px">Pepsi Black · Gatorade</div>
+          <div class="vehicle-label">ASIGNAR VEHÍCULO</div>
+          <div class="vehicle-grid" id="vgrid-UIO"></div>
+        </div>
+      </div>
+
+      <!-- MCH -->
+      <div class="city-card" id="card-MCH">
+        <div class="city-header" onclick="toggleCard('MCH')">
+          <span class="city-code">MCH</span>
+          <span class="city-name">Machala</span>
+          <span class="city-status-dot"></span>
+          <span class="city-toggle">▼</span>
+        </div>
+        <div class="city-details">
+          <span class="priority-tag priority-volume">📦 VOLUMEN</span>
+          <div class="city-meta">
+            <div class="meta-item"><div class="meta-label">Unidades</div><div class="meta-value" style="color:var(--gold)">580</div></div>
+            <div class="meta-item"><div class="meta-label">Ventana</div><div class="meta-value">8h</div></div>
+            <div class="meta-item"><div class="meta-label">Dist.GYE</div><div class="meta-value">88 km</div></div>
+            <div class="meta-item"><div class="meta-label">Frío</div><div class="meta-value" style="color:var(--gray)">No req.</div></div>
+          </div>
+          <div style="font-size:10px;color:rgba(240,244,255,0.5);font-family:var(--font-data);margin-bottom:10px">Pepsi · 7UP · Doritos</div>
+          <div class="vehicle-label">ASIGNAR VEHÍCULO</div>
+          <div class="vehicle-grid" id="vgrid-MCH"></div>
+        </div>
+      </div>
+
+      <!-- CUE -->
+      <div class="city-card" id="card-CUE">
+        <div class="city-header" onclick="toggleCard('CUE')">
+          <span class="city-code">CUE</span>
+          <span class="city-name">Cuenca</span>
+          <span class="city-status-dot"></span>
+          <span class="city-toggle">▼</span>
+        </div>
+        <div class="city-details">
+          <span class="priority-tag priority-cold">❄ REFRIGERADO + 4x4</span>
+          <div class="city-meta">
+            <div class="meta-item"><div class="meta-label">Unidades</div><div class="meta-value" style="color:var(--gold)">310</div></div>
+            <div class="meta-item"><div class="meta-label">Ventana</div><div class="meta-value" style="color:var(--gold)">≤ 5h</div></div>
+            <div class="meta-item"><div class="meta-label">Dist.GYE</div><div class="meta-value">195 km</div></div>
+            <div class="meta-item"><div class="meta-label">Req.</div><div class="meta-value" style="color:var(--cyan)">Frío+4x4</div></div>
+          </div>
+          <div style="font-size:10px;color:rgba(240,244,255,0.5);font-family:var(--font-data);margin-bottom:10px">Tropicana · Lipton (refrigerado)</div>
+          <div class="vehicle-label">ASIGNAR VEHÍCULO</div>
+          <div class="vehicle-grid" id="vgrid-CUE"></div>
+        </div>
+      </div>
+
+      <!-- MEC -->
+      <div class="city-card" id="card-MEC">
+        <div class="city-header" onclick="toggleCard('MEC')">
+          <span class="city-code">MEC</span>
+          <span class="city-name">Manta</span>
+          <span class="city-status-dot"></span>
+          <span class="city-toggle">▼</span>
+        </div>
+        <div class="city-details">
+          <span class="priority-tag priority-normal">NORMAL</span>
+          <div class="city-meta">
+            <div class="meta-item"><div class="meta-label">Unidades</div><div class="meta-value" style="color:var(--gold)">240</div></div>
+            <div class="meta-item"><div class="meta-label">Ventana</div><div class="meta-value">7h</div></div>
+            <div class="meta-item"><div class="meta-label">Dist.GYE</div><div class="meta-value">200 km</div></div>
+            <div class="meta-item"><div class="meta-label">Frío</div><div class="meta-value" style="color:var(--gray)">No req.</div></div>
+          </div>
+          <div style="font-size:10px;color:rgba(240,244,255,0.5);font-family:var(--font-data);margin-bottom:10px">Pepsi · Mirinda · Lay's</div>
+          <div class="vehicle-label">ASIGNAR VEHÍCULO</div>
+          <div class="vehicle-grid" id="vgrid-MEC"></div>
+        </div>
+      </div>
+
+      <!-- ROUTE SUMMARY -->
+      <div class="route-summary">
+        <div class="panel-title" style="margin-bottom:8px">◈ Ruta Actual</div>
+        <div class="route-path" id="route-path-display">GYE → …</div>
+        <div style="font-family:var(--font-data);font-size:10px;color:rgba(240,244,255,0.35);margin-top:6px" id="route-km-display">0 km total</div>
+      </div>
+
+      <button class="btn-clear-route" onclick="clearRoute()">✕ LIMPIAR RUTA</button>
+    </div>
+
+    <!-- ── CENTER PANEL (MAP) ── -->
+    <div class="center-panel">
+      <div class="map-title">▸ Mapa de Rutas — Ecuador</div>
+
+      <svg id="ecuador-map" viewBox="0 0 480 580" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <marker id="arrow-gold" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#F7B731"/>
+          </marker>
+        </defs>
+
+        <!-- Ecuador country silhouette (simplified polygonal) -->
+        <g id="ecuador-shape">
+          <!-- Main coast and mountains (stylized) -->
+          <path d="M 120,30 L 160,20 L 220,28 L 260,22 L 300,35 L 340,50 L 360,80 L 370,120 L 360,160 L 350,200 L 360,240 L 370,270 L 355,310 L 340,340 L 310,380 L 280,420 L 250,460 L 230,500 L 210,530 L 190,520 L 170,490 L 150,450 L 140,410 L 120,380 L 100,340 L 90,300 L 80,260 L 85,220 L 95,180 L 90,140 L 100,100 L 110,60 Z"
+                fill="rgba(0,75,147,0.08)" stroke="rgba(0,120,215,0.25)" stroke-width="1.5"/>
+
+          <!-- Mountains ridge -->
+          <path d="M 200,80 L 210,120 L 215,160 L 220,200 L 218,240 L 215,280 L 210,320 L 205,360 L 200,400"
+                fill="none" stroke="rgba(0,120,215,0.12)" stroke-width="1" stroke-dasharray="4 3"/>
+
+          <!-- Coast outline highlight -->
+          <path d="M 120,30 L 100,100 L 90,140 L 85,180 L 80,220 L 90,260 L 100,300 L 120,340 L 140,380 L 155,420"
+                fill="none" stroke="rgba(72,219,251,0.15)" stroke-width="2"/>
+
+          <!-- Galápagos (small islands) -->
+          <circle cx="60" cy="200" r="15" fill="rgba(0,75,147,0.08)" stroke="rgba(0,120,215,0.2)" stroke-width="1"/>
+          <circle cx="40" cy="210" r="8" fill="rgba(0,75,147,0.06)" stroke="rgba(0,120,215,0.15)" stroke-width="1"/>
+          <circle cx="72" cy="215" r="10" fill="rgba(0,75,147,0.06)" stroke="rgba(0,120,215,0.15)" stroke-width="1"/>
+          <text x="56" y="240" font-family="JetBrains Mono" font-size="7" fill="rgba(72,219,251,0.4)" text-anchor="middle">Galápagos</text>
+
+          <!-- Grid lines (subtle) -->
+          <line x1="80" y1="0" x2="80" y2="580" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="160" y1="0" x2="160" y2="580" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="240" y1="0" x2="240" y2="580" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="320" y1="0" x2="320" y2="580" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="0" y1="100" x2="480" y2="100" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="0" y1="200" x2="480" y2="200" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="0" y1="300" x2="480" y2="300" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+          <line x1="0" y1="400" x2="480" y2="400" stroke="rgba(0,120,215,0.04)" stroke-width="1"/>
+        </g>
+
+        <!-- ROUTE LINES (drawn between city coords) -->
+        <!-- GYE(150,420) UIO(260,80) MCH(100,470) CUE(250,350) MEC(100,260) -->
+        <g id="route-lines">
+          <line id="line-GYE-UIO" class="route-line" x1="150" y1="420" x2="260" y2="80" marker-end="url(#arrow-gold)"/>
+          <line id="line-GYE-MCH" class="route-line" x1="150" y1="420" x2="100" y2="470" marker-end="url(#arrow-gold)"/>
+          <line id="line-GYE-CUE" class="route-line" x1="150" y1="420" x2="250" y2="350" marker-end="url(#arrow-gold)"/>
+          <line id="line-GYE-MEC" class="route-line" x1="150" y1="420" x2="100" y2="260" marker-end="url(#arrow-gold)"/>
+          <line id="line-UIO-MCH" class="route-line" x1="260" y1="80" x2="100" y2="470" marker-end="url(#arrow-gold)"/>
+          <line id="line-UIO-CUE" class="route-line" x1="260" y1="80" x2="250" y2="350" marker-end="url(#arrow-gold)"/>
+          <line id="line-UIO-MEC" class="route-line" x1="260" y1="80" x2="100" y2="260" marker-end="url(#arrow-gold)"/>
+          <line id="line-MCH-CUE" class="route-line" x1="100" y1="470" x2="250" y2="350" marker-end="url(#arrow-gold)"/>
+          <line id="line-MCH-MEC" class="route-line" x1="100" y1="470" x2="100" y2="260" marker-end="url(#arrow-gold)"/>
+          <line id="line-CUE-MEC" class="route-line" x1="250" y1="350" x2="100" y2="260" marker-end="url(#arrow-gold)"/>
+        </g>
+
+        <!-- CITY MARKERS -->
+        <!-- GYE - Guayaquil (base) -->
+        <g class="city-marker" id="marker-GYE" transform="translate(150,420)">
+          <circle class="city-ring" r="22" stroke="var(--blue2)"/>
+          <circle r="12" fill="var(--blue)" stroke="var(--blue2)" stroke-width="2" filter="url(#glow)"/>
+          <circle r="5" fill="var(--blue2)"/>
+          <text y="-18" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="var(--blue2)" text-anchor="middle">GYE</text>
+          <text y="28" font-family="Barlow Condensed" font-size="10" fill="rgba(240,244,255,0.5)" text-anchor="middle">BASE</text>
+        </g>
+
+        <!-- UIO - Quito -->
+        <g class="city-marker" id="marker-UIO" transform="translate(260,80)" onclick="toggleCity('UIO')" style="cursor:pointer">
+          <circle class="city-ring" r="22" stroke="var(--red)"/>
+          <circle r="12" fill="var(--bg3)" stroke="rgba(240,244,255,0.2)" stroke-width="2"/>
+          <circle r="5" fill="rgba(240,244,255,0.4)"/>
+          <text y="-18" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="var(--white)" text-anchor="middle">UIO</text>
+          <text y="28" font-family="Barlow Condensed" font-size="10" fill="rgba(240,244,255,0.4)" text-anchor="middle">Quito</text>
+          <!-- Urgency badge -->
+          <rect x="10" y="-32" width="28" height="12" rx="2" fill="rgba(237,28,36,0.8)"/>
+          <text x="24" y="-23" font-family="JetBrains Mono" font-size="7" fill="white" text-anchor="middle">URG</text>
+        </g>
+
+        <!-- MCH - Machala -->
+        <g class="city-marker" id="marker-MCH" transform="translate(100,470)" onclick="toggleCity('MCH')" style="cursor:pointer">
+          <circle class="city-ring" r="22" stroke="var(--gold)"/>
+          <circle r="12" fill="var(--bg3)" stroke="rgba(240,244,255,0.2)" stroke-width="2"/>
+          <circle r="5" fill="rgba(240,244,255,0.4)"/>
+          <text y="-18" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="var(--white)" text-anchor="middle">MCH</text>
+          <text y="28" font-family="Barlow Condensed" font-size="10" fill="rgba(240,244,255,0.4)" text-anchor="middle">Machala</text>
+        </g>
+
+        <!-- CUE - Cuenca -->
+        <g class="city-marker" id="marker-CUE" transform="translate(250,350)" onclick="toggleCity('CUE')" style="cursor:pointer">
+          <circle class="city-ring" r="22" stroke="var(--cyan)"/>
+          <circle r="12" fill="var(--bg3)" stroke="rgba(240,244,255,0.2)" stroke-width="2"/>
+          <circle r="5" fill="rgba(240,244,255,0.4)"/>
+          <text y="-18" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="var(--white)" text-anchor="middle">CUE</text>
+          <text y="28" font-family="Barlow Condensed" font-size="10" fill="rgba(240,244,255,0.4)" text-anchor="middle">Cuenca</text>
+          <!-- Cold badge -->
+          <text x="14" y="-22" font-size="10">❄</text>
+        </g>
+
+        <!-- MEC - Manta -->
+        <g class="city-marker" id="marker-MEC" transform="translate(100,260)" onclick="toggleCity('MEC')" style="cursor:pointer">
+          <circle class="city-ring" r="22" stroke="var(--green)"/>
+          <circle r="12" fill="var(--bg3)" stroke="rgba(240,244,255,0.2)" stroke-width="2"/>
+          <circle r="5" fill="rgba(240,244,255,0.4)"/>
+          <text y="-18" font-family="Barlow Condensed" font-size="13" font-weight="700" fill="var(--white)" text-anchor="middle">MEC</text>
+          <text y="28" font-family="Barlow Condensed" font-size="10" fill="rgba(240,244,255,0.4)" text-anchor="middle">Manta</text>
+        </g>
+
+        <!-- North indicator -->
+        <g transform="translate(440, 40)">
+          <circle r="16" fill="rgba(0,0,0,0.5)" stroke="rgba(0,120,215,0.3)" stroke-width="1"/>
+          <text y="-4" font-family="Barlow Condensed" font-size="11" font-weight="700" fill="var(--white)" text-anchor="middle">N</text>
+          <line x1="0" y1="4" x2="0" y2="12" stroke="var(--white)" stroke-width="1.5"/>
+          <polygon points="0,-12 -3,-4 3,-4" fill="var(--red)"/>
+        </g>
+
+        <!-- Scale -->
+        <g transform="translate(320, 550)">
+          <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(240,244,255,0.3)" stroke-width="1.5"/>
+          <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(240,244,255,0.3)" stroke-width="1.5"/>
+          <line x1="60" y1="-4" x2="60" y2="4" stroke="rgba(240,244,255,0.3)" stroke-width="1.5"/>
+          <text x="30" y="-8" font-family="JetBrains Mono" font-size="8" fill="rgba(240,244,255,0.35)" text-anchor="middle">~100 km</text>
+        </g>
+      </svg>
+
+      <div class="map-hint">
+        Haz clic en los marcadores del mapa o en las tarjetas para agregar ciudades a la ruta
+      </div>
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="right-panel">
+      <div class="panel-title">◆ Métricas en Vivo</div>
+
+      <!-- Live score preview -->
+      <div class="score-preview">
+        <div class="score-big" id="score-right">0</div>
+        <div class="score-max">/ 1000 PTS</div>
+      </div>
+
+      <!-- Metric bars -->
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">🏙 Cobertura de Ciudades</span>
+          <span class="metric-pts" id="m-coverage-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-coverage-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-coverage-detail">0 / 4 destinos añadidos</div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">📏 Eficiencia de Ruta</span>
+          <span class="metric-pts" id="m-distance-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-distance-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-distance-detail">Óptimo: 756 km</div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">❄ Cuenca — Vehículo</span>
+          <span class="metric-pts" id="m-cold-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-cold-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-cold-detail">Requiere frío + 4x4</div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">⚡ Quito — Tiempo</span>
+          <span class="metric-pts" id="m-uio-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-uio-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-uio-detail">Ventana: ≤ 4.5h</div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">🚛 Capacidad Vehículos</span>
+          <span class="metric-pts" id="m-capacity-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-capacity-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-capacity-detail">Sin sobrecarga</div>
+      </div>
+
+      <div class="metric-block">
+        <div class="metric-header">
+          <span class="metric-name">🕐 Tiempo Total Ruta</span>
+          <span class="metric-pts" id="m-time-pts">0 pts</span>
+        </div>
+        <div class="metric-bar-track"><div class="metric-bar-fill" id="m-time-bar" style="width:0%"></div></div>
+        <div class="metric-detail" id="m-time-detail">Meta: ≤ 10h total</div>
+      </div>
+
+      <!-- Fleet status -->
+      <div class="panel-title" style="margin-top:16px">🚗 Estado de Flota</div>
+      <div class="fleet-section" id="fleet-status">
+        <div class="fleet-item" id="fleet-UIO">
+          <div class="fleet-dot" id="fdot-UIO"></div>
+          <div class="fleet-city">UIO · Quito</div>
+          <div class="fleet-vehicle" id="fveh-UIO">Sin asignar</div>
+        </div>
+        <div class="fleet-item" id="fleet-MCH">
+          <div class="fleet-dot" id="fdot-MCH"></div>
+          <div class="fleet-city">MCH · Machala</div>
+          <div class="fleet-vehicle" id="fveh-MCH">Sin asignar</div>
+        </div>
+        <div class="fleet-item" id="fleet-CUE">
+          <div class="fleet-dot" id="fdot-CUE"></div>
+          <div class="fleet-city">CUE · Cuenca</div>
+          <div class="fleet-vehicle" id="fveh-CUE">Sin asignar</div>
+        </div>
+        <div class="fleet-item" id="fleet-MEC">
+          <div class="fleet-dot" id="fdot-MEC"></div>
+          <div class="fleet-city">MEC · Manta</div>
+          <div class="fleet-vehicle" id="fveh-MEC">Sin asignar</div>
+        </div>
+      </div>
+
+      <!-- Requirements legend -->
+      <div style="margin-top:12px;padding:12px;background:var(--bg3);border-radius:6px;border:1px solid rgba(0,120,215,0.12)">
+        <div class="panel-title" style="margin-bottom:8px">📋 Requisitos</div>
+        <div style="font-family:var(--font-data);font-size:10px;line-height:2;color:rgba(240,244,255,0.5)">
+          <div>🔴 UIO · &lt;4.5h · Penaliz. -120</div>
+          <div>🔵 MCH · &lt;8h · 580 unid</div>
+          <div>❄ CUE · &lt;5h · Frío+4x4</div>
+          <div>🟢 MEC · &lt;7h · Normal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ RESULT MODAL ══════════ -->
+<div id="result-modal">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <div class="score-circle-wrap">
+        <div class="score-circle">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(0,120,215,0.3)" stroke-width="8"/>
+            <circle cx="55" cy="55" r="48" fill="none" stroke="var(--gold)" stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray="301.6" id="score-arc"
+                    stroke-dashoffset="301.6"/>
+          </svg>
+          <div class="score-circle-number">
+            <div class="score-circle-val" id="modal-score-val">0</div>
+            <div class="score-circle-label">/ 1000</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-title-block">
+        <div class="modal-title" id="modal-title">Evaluando Ruta…</div>
+        <div class="modal-subtitle" id="modal-subtitle"></div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Route comparison -->
+      <div class="modal-section-title">COMPARATIVA DE RUTAS</div>
+      <div class="route-comparison">
+        <div class="route-col">
+          <div class="route-col-title">TU RUTA</div>
+          <div class="route-display" id="modal-your-route">—</div>
+        </div>
+        <div class="route-col">
+          <div class="route-col-title optimal">RUTA ÓPTIMA</div>
+          <div class="route-display optimal">
+            GYE →<br>MCH →<br>CUE →<br>UIO →<br>MEC →<br>GYE
+          </div>
+        </div>
+      </div>
+
+      <!-- Score breakdown -->
+      <div class="modal-section-title">DESGLOSE DE PUNTUACIÓN</div>
+      <div class="score-breakdown" id="score-breakdown"></div>
+
+      <!-- Evaluator analysis -->
+      <div class="modal-section-title" style="margin-top:16px">ANÁLISIS DEL EVALUADOR</div>
+      <div class="evaluator-card">
+        <div class="evaluator-title">▸ IA LOGÍSTICA — PepsiCo OPS</div>
+        <div class="evaluator-text" id="evaluator-text"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-retry" onclick="retryGame()">↺ NUEVO INTENTO</button>
+    </div>
+  </div>
+</div>
+
+<!-- TIME EXPIRED -->
+<div id="time-expired" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(7,11,20,0.85);align-items:center;justify-content:center;backdrop-filter:blur(4px);flex-direction:column;gap:20px">
+  <div class="expired-msg">⏱ TIEMPO AGOTADO</div>
+  <button class="btn-start" style="font-size:18px;padding:14px 40px" onclick="forceSubmit()">VER RESULTADO</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════
+// CONSTANTS & DATA
+// ══════════════════════════════════════
+
+const CITIES = {
+  GYE: { name: 'Guayaquil', units: 0,   cold: false, x4x4: false },
+  UIO: { name: 'Quito',     units: 420,  cold: false, x4x4: false },
+  MCH: { name: 'Machala',   units: 580,  cold: false, x4x4: false },
+  CUE: { name: 'Cuenca',    units: 310,  cold: true,  x4x4: true  },
+  MEC: { name: 'Manta',     units: 240,  cold: false, x4x4: false },
+};
+
+const DISTANCES = {
+  'GYE-UIO':275,'GYE-MCH':88,'GYE-CUE':195,'GYE-MEC':200,
+  'UIO-MCH':335,'UIO-CUE':240,'UIO-MEC':310,
+  'MCH-CUE':170,'MCH-MEC':295,
+  'CUE-MEC':360
+};
+
+function getDist(a, b) {
+  const k1 = `${a}-${b}`, k2 = `${b}-${a}`;
+  return DISTANCES[k1] || DISTANCES[k2] || 0;
+}
+
+const VEHICLES = [
+  { id:'std',  icon:'🚚', name:'Estándar',     cap:900, cold:false, x4x4:false, speed:1.00 },
+  { id:'ref',  icon:'🧊', name:'Refrigerado',  cap:700, cold:true,  x4x4:false, speed:0.92 },
+  { id:'4x4',  icon:'🛻', name:'4x4 Terreno',  cap:600, cold:false, x4x4:true,  speed:0.88 },
+  { id:'r4x4', icon:'❄🛻',name:'Refrig. 4x4',  cap:500, cold:true,  x4x4:true,  speed:0.82 },
+];
+
+const AVG_SPEED_KMH = 60; // base speed km/h
+
+// ══════════════════════════════════════
+// GAME STATE
+// ══════════════════════════════════════
+
+let gameState = {
+  route: [],       // city codes in order (excludes GYE start/end)
+  vehicles: {},    // { cityCode: vehicleId }
+  timerSec: 300,
+  timerInterval: null,
+  startTime: null,
+  submitted: false,
+};
+
+// ══════════════════════════════════════
+// INTRO
+// ══════════════════════════════════════
+
+function buildStars() {
+  const container = document.getElementById('stars-bg');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 3 + 1;
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      width:${size}px;
+      height:${size}px;
+      --d:${2+Math.random()*4}s;
+      --delay:${Math.random()*3}s;
+    `;
+    container.appendChild(s);
+  }
+}
+buildStars();
+
+function startGame() {
+  document.getElementById('intro-screen').style.display = 'none';
+  const gs = document.getElementById('game-screen');
+  gs.style.display = 'flex';
+  buildVehicleGrids();
+  gameState.startTime = Date.now();
+  startTimer();
+}
+
+// ══════════════════════════════════════
+// VEHICLE GRIDS
+// ══════════════════════════════════════
+
+function buildVehicleGrids() {
+  ['UIO','MCH','CUE','MEC'].forEach(city => {
+    const grid = document.getElementById(`vgrid-${city}`);
+    grid.innerHTML = '';
+    VEHICLES.forEach(v => {
+      const btn = document.createElement('div');
+      btn.className = 'vehicle-btn';
+      btn.id = `vbtn-${city}-${v.id}`;
+      btn.innerHTML = `
+        <div class="vehicle-icon">${v.icon}</div>
+        <div class="vehicle-name">${v.name}</div>
+        <div class="vehicle-cap">${v.cap} unid</div>
+      `;
+      btn.onclick = () => assignVehicle(city, v.id);
+      grid.appendChild(btn);
+    });
+  });
+}
+
+function assignVehicle(city, vehicleId) {
+  gameState.vehicles[city] = vehicleId;
+
+  // Update visual selection
+  ['UIO','MCH','CUE','MEC'].forEach(c => {
+    if (c !== city) return;
+    VEHICLES.forEach(v => {
+      const btn = document.getElementById(`vbtn-${c}-${v.id}`);
+      if (btn) {
+        btn.classList.remove('selected','conflict');
+        if (v.id === vehicleId) btn.classList.add('selected');
+      }
+    });
+  });
+
+  // Check conflict for CUE
+  if (city === 'CUE') {
+    const veh = VEHICLES.find(v => v.id === vehicleId);
+    const ok = veh.cold && veh.x4x4;
+    const btn = document.getElementById(`vbtn-CUE-${vehicleId}`);
+    if (!ok && btn) {
+      btn.classList.remove('selected');
+      btn.classList.add('conflict');
+    }
+  }
+
+  updateFleetStatus();
+  updateCardStatus();
+  updateMetrics();
+  checkSubmitReady();
+  showToast(`✓ ${CITIES[city].name}: ${VEHICLES.find(v=>v.id===vehicleId).icon} ${VEHICLES.find(v=>v.id===vehicleId).name}`, 'success');
+}
+
+// ══════════════════════════════════════
+// ROUTE MANAGEMENT
+// ══════════════════════════════════════
+
+function toggleCity(code) {
+  if (gameState.submitted) return;
+  const idx = gameState.route.indexOf(code);
+  if (idx === -1) {
+    gameState.route.push(code);
+    showToast(`+ ${CITIES[code].name} añadida a la ruta`);
+    // Auto-open card
+    const card = document.getElementById(`card-${code}`);
+    if (card && !card.classList.contains('open')) {
+      card.classList.add('open');
+    }
+  } else {
+    gameState.route.splice(idx, 1);
+    showToast(`− ${CITIES[code].name} removida de la ruta`, 'warn');
+  }
+  updateRouteVisuals();
+  updateMetrics();
+  checkSubmitReady();
+}
+
+function toggleCard(code) {
+  const card = document.getElementById(`card-${code}`);
+  if (!card) return;
+  card.classList.toggle('open');
+}
+
+function clearRoute() {
+  if (gameState.submitted) return;
+  gameState.route = [];
+  gameState.vehicles = {};
+  // Reset all vehicle buttons
+  ['UIO','MCH','CUE','MEC'].forEach(city => {
+    VEHICLES.forEach(v => {
+      const btn = document.getElementById(`vbtn-${city}-${v.id}`);
+      if (btn) btn.classList.remove('selected','conflict');
+    });
+  });
+  updateRouteVisuals();
+  updateFleetStatus();
+  updateCardStatus();
+  updateMetrics();
+  checkSubmitReady();
+  showToast('Ruta limpiada', 'warn');
+}
+
+function updateRouteVisuals() {
+  const destCodes = ['UIO','MCH','CUE','MEC'];
+
+  // Update map markers
+  destCodes.forEach(code => {
+    const marker = document.getElementById(`marker-${code}`);
+    const inRoute = gameState.route.includes(code);
+    if (marker) {
+      // Find the ring
+      const ring = marker.querySelector('.city-ring');
+      if (ring) ring.style.opacity = inRoute ? '1' : '0';
+      // Inner circle color
+      const circles = marker.querySelectorAll('circle');
+      if (circles[1]) {
+        circles[1].setAttribute('fill', inRoute ? (gameState.vehicles[code] ? 'var(--green)' : 'var(--gold)') : 'var(--bg3)');
+      }
+    }
+  });
+
+  // Draw route lines
+  // Full route: GYE → r[0] → r[1] → ... → GYE
+  const allLines = document.querySelectorAll('.route-line');
+  allLines.forEach(l => l.classList.remove('active'));
+
+  const fullRoute = ['GYE', ...gameState.route, 'GYE'];
+  for (let i = 0; i < fullRoute.length - 1; i++) {
+    const a = fullRoute[i], b = fullRoute[i+1];
+    const lineId1 = `line-${a}-${b}`;
+    const lineId2 = `line-${b}-${a}`;
+    const line = document.getElementById(lineId1) || document.getElementById(lineId2);
+    if (line) line.classList.add('active');
+  }
+
+  // Update route path display
+  const pathEl = document.getElementById('route-path-display');
+  const kmEl = document.getElementById('route-km-display');
+  if (gameState.route.length === 0) {
+    pathEl.textContent = 'GYE → …';
+    kmEl.textContent = '0 km total';
+  } else {
+    pathEl.innerHTML = fullRoute.join(' →\n');
+    const totalKm = calcTotalDistance();
+    kmEl.textContent = `${totalKm} km total`;
+  }
+}
+
+function calcTotalDistance() {
+  const fullRoute = ['GYE', ...gameState.route, 'GYE'];
+  let total = 0;
+  for (let i = 0; i < fullRoute.length - 1; i++) {
+    total += getDist(fullRoute[i], fullRoute[i+1]);
+  }
+  return total;
+}
+
+// Time to reach UIO in the route (hours)
+function calcTimeToUIO() {
+  if (!gameState.route.includes('UIO')) return null;
+  const vehId = gameState.vehicles['UIO'];
+  const veh = vehId ? VEHICLES.find(v => v.id === vehId) : null;
+  const speedFactor = veh ? veh.speed : 1.0;
+  const effectiveSpeed = AVG_SPEED_KMH * speedFactor;
+
+  // Time from GYE along route until UIO
+  const fullRoute = ['GYE', ...gameState.route];
+  let dist = 0;
+  for (let i = 0; i < fullRoute.length - 1; i++) {
+    dist += getDist(fullRoute[i], fullRoute[i+1]);
+    if (fullRoute[i+1] === 'UIO') break;
+  }
+  return dist / effectiveSpeed;
+}
+
+// Time to reach CUE
+function calcTimeToCUE() {
+  if (!gameState.route.includes('CUE')) return null;
+  const vehId = gameState.vehicles['CUE'];
+  const veh = vehId ? VEHICLES.find(v => v.id === vehId) : null;
+  const speedFactor = veh ? veh.speed : 1.0;
+  const effectiveSpeed = AVG_SPEED_KMH * speedFactor;
+
+  const fullRoute = ['GYE', ...gameState.route];
+  let dist = 0;
+  for (let i = 0; i < fullRoute.length - 1; i++) {
+    dist += getDist(fullRoute[i], fullRoute[i+1]);
+    if (fullRoute[i+1] === 'CUE') break;
+  }
+  return dist / effectiveSpeed;
+}
+
+function calcTotalRouteTime() {
+  const fullRoute = ['GYE', ...gameState.route, 'GYE'];
+  let totalDist = 0;
+  for (let i = 0; i < fullRoute.length - 1; i++) {
+    totalDist += getDist(fullRoute[i], fullRoute[i+1]);
+  }
+  // Use average speed factor of assigned vehicles
+  const assignedVehs = Object.values(gameState.vehicles).map(id => VEHICLES.find(v=>v.id===id)).filter(Boolean);
+  const avgFactor = assignedVehs.length ? assignedVehs.reduce((s,v)=>s+v.speed,0)/assignedVehs.length : 1.0;
+  return totalDist / (AVG_SPEED_KMH * avgFactor);
+}
+
+// ══════════════════════════════════════
+// CARD & FLEET STATUS
+// ══════════════════════════════════════
+
+function updateCardStatus() {
+  ['UIO','MCH','CUE','MEC'].forEach(code => {
+    const card = document.getElementById(`card-${code}`);
+    if (!card) return;
+    card.classList.remove('in-route','assigned','conflict');
+    const inRoute = gameState.route.includes(code);
+    const hasVeh = !!gameState.vehicles[code];
+
+    if (!inRoute) return;
+
+    if (code === 'CUE' && hasVeh) {
+      const veh = VEHICLES.find(v => v.id === gameState.vehicles[code]);
+      const ok = veh && veh.cold && veh.x4x4;
+      card.classList.add(ok ? 'assigned' : 'conflict');
+    } else if (hasVeh) {
+      const veh = VEHICLES.find(v => v.id === gameState.vehicles[code]);
+      const ok = veh && veh.cap >= CITIES[code].units;
+      card.classList.add(ok ? 'assigned' : 'conflict');
+    } else if (inRoute) {
+      card.classList.add('in-route');
+    }
+  });
+}
+
+function updateFleetStatus() {
+  ['UIO','MCH','CUE','MEC'].forEach(code => {
+    const dot = document.getElementById(`fdot-${code}`);
+    const vehLabel = document.getElementById(`fveh-${code}`);
+    if (!dot || !vehLabel) return;
+
+    dot.className = 'fleet-dot';
+    const vehId = gameState.vehicles[code];
+    const inRoute = gameState.route.includes(code);
+
+    if (!inRoute) {
+      vehLabel.textContent = 'Sin ruta';
+      return;
+    }
+
+    if (!vehId) {
+      dot.classList.add('in-route');
+      vehLabel.textContent = 'Sin vehículo';
+      return;
+    }
+
+    const veh = VEHICLES.find(v => v.id === vehId);
+    if (!veh) return;
+
+    let ok = veh.cap >= CITIES[code].units;
+    if (code === 'CUE') ok = ok && veh.cold && veh.x4x4;
+
+    dot.classList.add(ok ? 'active' : 'conflict');
+    vehLabel.textContent = `${veh.icon} ${veh.name}`;
+  });
+}
+
+// ══════════════════════════════════════
+// SCORING
+// ══════════════════════════════════════
+
+function computeScore() {
+  const R = gameState.route;
+  const V = gameState.vehicles;
+  let scores = {};
+  const OPTIMAL_KM = 756;
+
+  // 1. Coverage (up to 200)
+  const coverage = (R.length / 4) * 200;
+  scores.coverage = Math.round(coverage);
+
+  // 2. Distance efficiency (up to 150)
+  let distScore = 0;
+  if (R.length > 0) {
+    const totalKm = calcTotalDistance();
+    const ratio = OPTIMAL_KM / totalKm;
+    distScore = Math.min(150, Math.round(150 * Math.min(ratio, 1.0)));
+    if (totalKm < OPTIMAL_KM * 0.5) distScore = 0; // unrealistic
+  }
+  scores.distance = distScore;
+
+  // 3. Cuenca vehicle (up to 150, penalty if wrong)
+  let cueScore = 0;
+  if (R.includes('CUE')) {
+    const vehId = V['CUE'];
+    if (vehId) {
+      const veh = VEHICLES.find(v=>v.id===vehId);
+      if (veh.cold && veh.x4x4) cueScore = 150;
+      else if (veh.cold || veh.x4x4) cueScore = -50;
+      else cueScore = -100;
+    }
+  }
+  scores.cueVehicle = cueScore;
+
+  // 4. UIO on time ≤4.5h (150 pts, -120 if late)
+  let uioScore = 0;
+  if (R.includes('UIO')) {
+    const timeH = calcTimeToUIO();
+    if (timeH !== null) {
+      if (timeH <= 4.5) uioScore = 150;
+      else uioScore = -120;
+    }
+  }
+  scores.uioTime = uioScore;
+
+  // 5. Capacity per city (up to 100, penalty if overloaded)
+  let capScore = 0;
+  let capPossible = 0;
+  R.forEach(code => {
+    capPossible += 25;
+    const vehId = V[code];
+    if (vehId) {
+      const veh = VEHICLES.find(v=>v.id===vehId);
+      if (veh.cap >= CITIES[code].units) capScore += 25;
+      else capScore -= 10;
+    }
+  });
+  scores.capacity = Math.round(capScore);
+
+  // 6. CUE cold chain ≤5h (up to 100)
+  let coldScore = 0;
+  if (R.includes('CUE')) {
+    const timeH = calcTimeToCUE();
+    const vehId = V['CUE'];
+    const veh = vehId ? VEHICLES.find(v=>v.id===vehId) : null;
+    const hasCold = veh && veh.cold;
+    if (timeH !== null && hasCold) {
+      if (timeH <= 5) coldScore = 100;
+      else coldScore = Math.round(100 * Math.max(0, 1 - (timeH-5)/5));
+    }
+  }
+  scores.coldChain = coldScore;
+
+  // 7. Total time ≤10h (up to 100)
+  let timeScore = 0;
+  if (R.length > 0) {
+    const totalH = calcTotalRouteTime();
+    if (totalH <= 10) timeScore = 100;
+    else timeScore = Math.round(100 * Math.max(0, 1 - (totalH-10)/10));
+  }
+  scores.totalTime = timeScore;
+
+  // 8. Speed bonus (<2 min from start)
+  let speedBonus = 0;
+  const elapsedSec = gameState.startTime ? (Date.now() - gameState.startTime) / 1000 : 999;
+  if (R.length >= 3 && elapsedSec < 120) speedBonus = 50;
+  scores.speedBonus = speedBonus;
+
+  // Total
+  const total = Math.max(0, Math.min(1000,
+    scores.coverage + scores.distance + scores.cueVehicle +
+    scores.uioTime + scores.capacity + scores.coldChain +
+    scores.totalTime + scores.speedBonus
+  ));
+  scores.total = total;
+  return scores;
+}
+
+// ══════════════════════════════════════
+// LIVE METRICS UPDATE
+// ══════════════════════════════════════
+
+function updateMetrics() {
+  const scores = computeScore();
+  const R = gameState.route;
+  const V = gameState.vehicles;
+
+  // Coverage
+  setMetric('coverage', scores.coverage, 200, `${R.length} / 4 destinos`);
+
+  // Distance
+  const km = calcTotalDistance();
+  const distPct = km > 0 ? Math.round((756/km)*100) : 0;
+  setMetric('distance', scores.distance, 150, km > 0 ? `${km} km · Óptimo: 756 km` : 'Añade ciudades');
+
+  // CUE
+  const cuePct = Math.max(0, scores.cueVehicle > 0 ? scores.cueVehicle : 0);
+  const cueDetail = R.includes('CUE') ? (V['CUE'] ? (scores.cueVehicle > 0 ? '✓ Vehículo correcto' : '✗ Requiere frío+4x4') : 'Sin vehículo asignado') : 'Cuenca no en ruta';
+  const cueBar = document.getElementById('m-cold-bar');
+  const cuePts = document.getElementById('m-cold-pts');
+  cueBar.style.width = `${Math.max(0, scores.cueVehicle/150*100)}%`;
+  cueBar.className = `metric-bar-fill ${scores.cueVehicle >= 150 ? 'good' : scores.cueVehicle < 0 ? 'bad' : 'warn'}`;
+  cuePts.textContent = `${scores.cueVehicle > 0 ? '+' : ''}${scores.cueVehicle} pts`;
+  document.getElementById('m-cold-detail').textContent = cueDetail;
+
+  // UIO time
+  const uioH = calcTimeToUIO();
+  const uioDetail = uioH !== null ? `Llegada en ${uioH.toFixed(1)}h (ventana ≤4.5h)` : R.includes('UIO') ? 'Asigna vehículo' : 'Quito no en ruta';
+  const uioBar = document.getElementById('m-uio-bar');
+  const uioPts = document.getElementById('m-uio-pts');
+  uioBar.style.width = `${scores.uioTime > 0 ? 100 : (scores.uioTime < 0 ? 100 : 0)}%`;
+  uioBar.className = `metric-bar-fill ${scores.uioTime >= 150 ? 'good' : scores.uioTime < 0 ? 'bad' : 'warn'}`;
+  uioPts.textContent = `${scores.uioTime > 0 ? '+' : ''}${scores.uioTime} pts`;
+  document.getElementById('m-uio-detail').textContent = uioDetail;
+
+  // Capacity
+  setMetric('capacity', Math.max(0, scores.capacity), 100, scores.capacity < 0 ? '✗ Sobrecarga detectada' : 'Capacidades OK');
+
+  // Total time
+  const totalH = R.length > 0 ? calcTotalRouteTime() : 0;
+  setMetric('time', scores.totalTime, 100, totalH > 0 ? `${totalH.toFixed(1)}h total (meta ≤10h)` : 'Sin ruta calculada');
+
+  // Live score
+  const sv = document.getElementById('score-live');
+  const sr = document.getElementById('score-right');
+  sv.textContent = scores.total;
+  if (sr) sr.textContent = scores.total;
+
+  updateCardStatus();
+}
+
+function setMetric(id, val, max, detail) {
+  const bar = document.getElementById(`m-${id}-bar`);
+  const pts = document.getElementById(`m-${id}-pts`);
+  const det = document.getElementById(`m-${id}-detail`);
+  if (!bar || !pts) return;
+  const pct = Math.max(0, Math.min(100, (val/max)*100));
+  bar.style.width = `${pct}%`;
+  bar.className = `metric-bar-fill ${pct >= 80 ? 'good' : pct >= 40 ? 'warn' : 'bad'}`;
+  pts.textContent = `${val > 0 ? '+' : ''}${val} pts`;
+  if (det) det.textContent = detail;
+}
+
+// ══════════════════════════════════════
+// SUBMIT
+// ══════════════════════════════════════
+
+function checkSubmitReady() {
+  const ready = gameState.route.length >= 3;
+  document.getElementById('btn-submit').disabled = !ready;
+}
+
+function submitRoute() {
+  if (gameState.submitted) return;
+  gameState.submitted = true;
+  clearInterval(gameState.timerInterval);
+  showResultModal();
+}
+
+function forceSubmit() {
+  document.getElementById('time-expired').style.display = 'none';
+  gameState.submitted = true;
+  showResultModal();
+}
+
+function showResultModal() {
+  const scores = computeScore();
+  const R = gameState.route;
+  const V = gameState.vehicles;
+  const modal = document.getElementById('result-modal');
+  modal.style.display = 'block';
+
+  // Score arc animation
+  const arc = document.getElementById('score-arc');
+  const circumference = 301.6;
+  const offset = circumference - (scores.total / 1000) * circumference;
+  setTimeout(() => {
+    arc.style.transition = 'stroke-dashoffset 1.5s ease';
+    arc.setAttribute('stroke-dashoffset', offset);
+  }, 100);
+
+  // Score value count-up
+  const scoreEl = document.getElementById('modal-score-val');
+  let current = 0;
+  const target = scores.total;
+  const step = Math.ceil(target / 60);
+  const counter = setInterval(() => {
+    current = Math.min(current + step, target);
+    scoreEl.textContent = current;
+    if (current >= target) clearInterval(counter);
+  }, 16);
+
+  // Title
+  const titleEl = document.getElementById('modal-title');
+  const subEl = document.getElementById('modal-subtitle');
+  if (scores.total >= 800) {
+    titleEl.textContent = '🏆 EXCELENTE LOGÍSTICA';
+    subEl.textContent = 'Candidato fuerte para la pasantía — decisión estratégica sobresaliente';
+  } else if (scores.total >= 600) {
+    titleEl.textContent = '⚡ BUENA GESTIÓN';
+    subEl.textContent = 'Sólido desempeño — hay margen de optimización';
+  } else if (scores.total >= 400) {
+    titleEl.textContent = '📦 EN DESARROLLO';
+    subEl.textContent = 'Potencial detectado — revisar cadena de frío y tiempos';
+  } else {
+    titleEl.textContent = '📋 OPORTUNIDAD DE MEJORA';
+    subEl.textContent = 'Áreas críticas de optimización identificadas';
+  }
+
+  // Your route
+  const routeEl = document.getElementById('modal-your-route');
+  if (R.length === 0) {
+    routeEl.textContent = '(Sin ruta definida)';
+  } else {
+    const full = ['GYE', ...R, 'GYE'];
+    routeEl.innerHTML = full.join(' →<br>');
+    const km = calcTotalDistance();
+    routeEl.innerHTML += `<br><span style="color:rgba(240,244,255,0.4);font-size:11px">${km} km</span>`;
+  }
+
+  // Breakdown
+  const breakdown = document.getElementById('score-breakdown');
+  const items = [
+    { icon:'🏙', name:'Cobertura de Ciudades', pts: scores.coverage, max: 200 },
+    { icon:'📏', name:'Eficiencia de Distancia', pts: scores.distance, max: 150 },
+    { icon:'❄',  name:'Vehículo Correcto Cuenca', pts: scores.cueVehicle, max: 150 },
+    { icon:'⚡', name:'Quito Llegada a Tiempo', pts: scores.uioTime, max: 150 },
+    { icon:'🚛', name:'Capacidad Correcta', pts: scores.capacity, max: 100 },
+    { icon:'🧊', name:'Cadena de Frío Cuenca', pts: scores.coldChain, max: 100 },
+    { icon:'🕐', name:'Tiempo Total Ruta', pts: scores.totalTime, max: 100 },
+    { icon:'⚡', name:'Bonus Decisión Rápida', pts: scores.speedBonus, max: 50 },
+  ];
+
+  breakdown.innerHTML = items.map(item => {
+    const cls = item.pts > 0 ? 'pos' : item.pts < 0 ? 'neg' : 'zero';
+    const barPct = Math.max(0, (item.pts / item.max) * 100);
+    return `
+      <div class="breakdown-item">
+        <div class="breakdown-icon">${item.icon}</div>
+        <div class="breakdown-name">${item.name}</div>
+        <div class="breakdown-bar">
+          <div class="breakdown-bar-fill" style="width:${barPct}%;background:${item.pts < 0 ? 'var(--red)' : 'var(--green)'}"></div>
+        </div>
+        <div class="breakdown-pts ${cls}">${item.pts > 0 ? '+' : ''}${item.pts}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Evaluator analysis
+  const evalEl = document.getElementById('evaluator-text');
+  let evalText = '';
+  const cueVeh = V['CUE'] ? VEHICLES.find(v=>v.id===V['CUE']) : null;
+  const uioTime = calcTimeToUIO();
+  const cueTime = calcTimeToCUE();
+
+  if (!R.includes('CUE')) evalText += '⚠️ <strong>Cuenca omitida:</strong> La entrega refrigerada de Tropicana/Lipton requiere atención inmediata. ';
+  else if (cueVeh && (!cueVeh.cold || !cueVeh.x4x4)) evalText += '❌ <strong>Error crítico Cuenca:</strong> Se asignó vehículo sin las capacidades requeridas (frío + 4x4). Producto en riesgo sanitario. ';
+  else if (cueVeh && cueTime > 5) evalText += '⚠️ <strong>Cadena de frío Cuenca:</strong> El tiempo de llegada supera la ventana de 5h para productos refrigerados. ';
+  else if (cueVeh) evalText += '✅ <strong>Cuenca correcta:</strong> Vehículo Refrigerado 4x4 asignado y dentro de ventana de cadena de frío. ';
+
+  if (!R.includes('UIO')) evalText += '⚠️ <strong>Quito omitido:</strong> Entrega urgente no atendida — penalización máxima aplicada. ';
+  else if (uioTime > 4.5) evalText += `❌ <strong>Quito tarde:</strong> Llegada estimada ${uioTime?.toFixed(1)}h supera ventana de 4.5h. -120 pts aplicados. `;
+  else evalText += `✅ <strong>Quito a tiempo:</strong> Llegada en ${uioTime?.toFixed(1)}h dentro de ventana crítica. `;
+
+  if (scores.total >= 750) {
+    evalText += '🏆 <strong>Perfil logístico sólido.</strong> Demuestra comprensión de trade-offs entre velocidad, capacidad y requisitos técnicos. Candidato destacado.';
+  } else if (scores.total >= 500) {
+    evalText += '📊 <strong>Desempeño competente.</strong> Buena cobertura pero optimización de ruta y asignación de flota mejorable. Revisa prioridades URGENTE vs VOLUMEN.';
+  } else {
+    evalText += '📋 <strong>Área de desarrollo:</strong> Revisar matriz de distancias, restricciones de vehículos y ventanas de entrega antes del próximo intento.';
+  }
+
+  evalEl.innerHTML = evalText;
+}
+
+// ══════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════
+
+function startTimer() {
+  const timerEl = document.getElementById('timer-display');
+  gameState.timerInterval = setInterval(() => {
+    gameState.timerSec--;
+    if (gameState.timerSec <= 0) {
+      clearInterval(gameState.timerInterval);
+      timerEl.textContent = '00:00';
+      if (!gameState.submitted) {
+        document.getElementById('time-expired').style.display = 'flex';
+      }
+      return;
+    }
+    const m = Math.floor(gameState.timerSec / 60);
+    const s = gameState.timerSec % 60;
+    timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if (gameState.timerSec <= 30) timerEl.classList.add('urgent');
+    else timerEl.classList.remove('urgent');
+  }, 1000);
+}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+
+let toastTimeout;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════
+// RETRY
+// ══════════════════════════════════════
+
+function retryGame() {
+  gameState = {
+    route: [],
+    vehicles: {},
+    timerSec: 300,
+    timerInterval: null,
+    startTime: Date.now(),
+    submitted: false,
+  };
+
+  document.getElementById('result-modal').style.display = 'none';
+  document.getElementById('time-expired').style.display = 'none';
+  document.getElementById('timer-display').textContent = '05:00';
+  document.getElementById('timer-display').classList.remove('urgent');
+  document.getElementById('btn-submit').disabled = true;
+
+  // Reset all cards
+  ['UIO','MCH','CUE','MEC'].forEach(code => {
+    const card = document.getElementById(`card-${code}`);
+    if (card) card.classList.remove('in-route','assigned','conflict','open');
+    VEHICLES.forEach(v => {
+      const btn = document.getElementById(`vbtn-${code}-${v.id}`);
+      if (btn) btn.classList.remove('selected','conflict');
+    });
+  });
+
+  updateRouteVisuals();
+  updateFleetStatus();
+  updateMetrics();
+  startTimer();
+}
+
+// ── init score arc
+document.addEventListener('DOMContentLoaded', () => {
+  const arc = document.getElementById('score-arc');
+  if (arc) arc.setAttribute('stroke-dashoffset', '301.6');
+});
+</script>
+</body>
+</html>
